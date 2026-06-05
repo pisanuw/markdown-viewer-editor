@@ -9,3 +9,7 @@
 2026-05-24 fix Protected mermaid.initialize() with try-catch so CDN failure doesn't break entire app; moved stray event listeners into init(); fixed copyHtmlBtn variable reference; fixed backtick escaping in default markdown template literal
 
 2026-06-05 fix Finder double-click opened welcome.md instead of target: replaced shell launcher with osacompile droplet so macOS Apple Events (on open) pass the file path correctly; also fixed base64 line-wrapping bug in both scripts (tr -d newline)
+2026-06-05 code Added bin/make-zip.sh: rebuilds .app via setup-macos-app.sh then packages with ditto; Markdown Editor.zip now tracked in git for direct download
+2026-06-05 note Initialized git repo and pushed to https://github.com/pisanuw/markdown-viewer-editor.git
+2026-06-05 fix Eliminated "Press Run" dialog: compile droplet directly to app path so osacompile's full bundle is preserved (PkgInfo, droplet.rsrc, Assets.car, OSAAppletShowStartupScreen=false, CFBundleExecutable=droplet); re-sign with codesign ad-hoc after patching plist; on-open handler runs helper in background for immediate return
+2026-06-05 fix Rebuilt Markdown Editor.zip with corrected bundle (23 KB old broken shell-script version replaced with 852 KB proper droplet bundle)
