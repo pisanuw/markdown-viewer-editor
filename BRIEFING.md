@@ -49,19 +49,31 @@ A simple split-pane markdown editor with live preview.
 Double-click a `.md` file in Finder to open it in the editor:
 
 ```bash
-# Option 1: One-time setup creates a native .app
+# Build the app (one-time setup)
 ./bin/setup-macos-app.sh
 
 # Then right-click any .md file -> Open With -> Markdown Editor
 # (set as default via Get Info -> Change All)
 ```
 
-Running `./bin/setup-macos-app.sh` creates `Markdown Editor.app` with `index.html` bundled inside `Contents/Resources/`. The app is fully self-contained -- you can move it to `/Applications` with no external dependencies.
+Running `./bin/setup-macos-app.sh` creates `Markdown Editor.app` with `index.html` bundled inside `Contents/Resources/`. The app is fully self-contained and can be moved to `/Applications`.
 
 The app registers itself for `.md` files via LaunchServices. Mechanism:
 
-1. Double-clicking a `.md` file triggers `Contents/MacOS/md-open`
-2. It base64-encodes the file content, creates a temp HTML with the content injected, and opens it in the default browser
-3. Temp file is cleaned up after 30 seconds
+1. Double-clicking a `.md` file sends an Apple Event (`on open`) to `Contents/MacOS/droplet`
+2. `droplet` is the AppleScript runtime binary produced by `osacompile`; it loads `Contents/Resources/Scripts/main.scpt` and runs the `on open` handler, which calls `Contents/Resources/md-open-helper.sh` in the background
+3. The helper base64-encodes the file, injects the content into a temp HTML, and opens it in the default browser
+4. Temp file is cleaned up after 30 seconds
 
-A standalone shell script (`bin/md-open.sh <file>`) is also available for terminal use.
+**Important constraints:**
+- `CFBundleExecutable` must be `droplet` (the name osacompile assigns). Renaming it breaks Apple Event delivery.
+- The full bundle from `osacompile` must be preserved: `PkgInfo`, `droplet.rsrc`, `Assets.car`, and `OSAAppletShowStartupScreen=false` in the plist are all required. Extracting only the binary into a hand-crafted bundle omits these and causes the "Press Run" dialog.
+- `setup-macos-app.sh` compiles directly to the final app path, patches the plist with PlistBuddy, then re-signs with `codesign --force --deep --sign -`.
+
+A standalone shell script (`bin/md-open.sh <file>`) is available for terminal use.
+
+To rebuild the zip for distribution: `./bin/make-zip.sh`
+
+## Repository
+
+https://github.com/pisanuw/markdown-viewer-editor
