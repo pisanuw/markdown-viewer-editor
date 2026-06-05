@@ -7,3 +7,5 @@
 2026-05-24 code Bundled index.html inside .app/Contents/Resources/ for self-contained deployment to /Applications
 2026-05-24 code Implemented 19 features: KaTeX math, Mermaid diagrams, anchor links, task list toggling, Vim/Emacs keymaps, font size slider, emoji picker, fullscreen, shortcut cheat sheet, spell check, open recent dropdown, workspace save/restore, auto backups, copy HTML, PDF print, present mode, drag tabs, word stats breakdown, preview-only mode
 2026-05-24 fix Protected mermaid.initialize() with try-catch so CDN failure doesn't break entire app; moved stray event listeners into init(); fixed copyHtmlBtn variable reference; fixed backtick escaping in default markdown template literal
+
+2026-06-05 fix Finder double-click opened welcome.md instead of target: replaced shell launcher with osacompile droplet so macOS Apple Events (on open) pass the file path correctly; also fixed base64 line-wrapping bug in both scripts (tr -d newline)
