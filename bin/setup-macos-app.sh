@@ -8,23 +8,45 @@ DIR="$(cd "$(dirname "$0")/.." && pwd)"
 APP_NAME="Markdown Editor"
 APP_PATH="$DIR/$APP_NAME.app"
 CONTENTS="$APP_PATH/Contents"
-MACOS="$CONTENTS/MacOS"
 RESOURCES="$CONTENTS/Resources"
-SCRIPTS_DIR="$RESOURCES/Scripts"
+PLIST="$CONTENTS/Info.plist"
 
 if [ -d "$APP_PATH" ]; then
   echo "Removing existing $APP_NAME.app..."
   rm -rf "$APP_PATH"
 fi
 
-echo "Creating $APP_NAME.app..."
-mkdir -p "$MACOS" "$RESOURCES" "$SCRIPTS_DIR"
+echo "Building AppleScript droplet..."
 
-# Bundle index.html inside the app
+# Compile the droplet directly to the final app path so osacompile creates the
+# complete bundle: PkgInfo, droplet.rsrc, Assets.car, code signature, etc.
+# Extracting just the binary into a hand-crafted bundle (the previous approach)
+# left out the resources macOS needs to deliver Apple Events, and also dropped
+# OSAAppletShowStartupScreen=false, causing the "Press Run" dialog.
+TMPSCRIPT=$(mktemp /tmp/md-launcher.XXXXXX)
+cat > "$TMPSCRIPT" << 'ASCRIPT'
+on run
+  set resDir to (POSIX path of (path to me)) & "Contents/Resources/"
+  do shell script "open " & quoted form of ("file://" & resDir & "index.html") & " &"
+end run
+
+on open filelist
+  set resDir to (POSIX path of (path to me)) & "Contents/Resources/"
+  set helper to resDir & "md-open-helper.sh"
+  repeat with f in filelist
+    set fPath to POSIX path of f
+    -- Run in background so the handler returns immediately
+    do shell script (quoted form of helper) & " " & quoted form of fPath & " " & quoted form of resDir & " &"
+  end repeat
+end open
+ASCRIPT
+
+osacompile -o "$APP_PATH" "$TMPSCRIPT"
+rm -f "$TMPSCRIPT"
+
+# Add our resources to the osacompile-generated bundle
 cp "$DIR/index.html" "$RESOURCES/"
 
-# Create the file-opening helper script in Resources.
-# This is called by the AppleScript launcher with (file_path, res_dir) args.
 cat > "$RESOURCES/md-open-helper.sh" << 'HELPER'
 #!/bin/bash
 set -euo pipefail
@@ -55,81 +77,27 @@ sleep 30 && rm -rf "$TMPDIR" &
 HELPER
 chmod +x "$RESOURCES/md-open-helper.sh"
 
-# Compile an AppleScript applet as the main executable.
-# Shell scripts cannot receive Apple Events, so a plain shell launcher
-# never gets the file path when opened via Finder double-click.
-# An AppleScript applet handles the 'on open' Apple Event natively.
-TMPSCRIPT=$(mktemp /tmp/md-launcher.XXXXXX)
-cat > "$TMPSCRIPT" << 'ASCRIPT'
-on run
-  set resDir to (POSIX path of (path to me)) & "Contents/Resources/"
-  do shell script "open " & quoted form of ("file://" & resDir & "index.html")
-end run
+# Patch the plist: update bundle name/ID and replace the generic wildcard
+# document type with our specific markdown types.
+# CFBundleExecutable stays as 'droplet' (osacompile's value) — renaming it
+# breaks Apple Event delivery.
+/usr/libexec/PlistBuddy -c "Set :CFBundleName 'Markdown Editor'" "$PLIST"
+/usr/libexec/PlistBuddy -c "Add :CFBundleIdentifier string com.opencode.md-editor" "$PLIST" \
+  2>/dev/null || /usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier com.opencode.md-editor" "$PLIST"
+/usr/libexec/PlistBuddy -c "Delete :CFBundleDocumentTypes" "$PLIST"
+/usr/libexec/PlistBuddy \
+  -c "Add :CFBundleDocumentTypes array" \
+  -c "Add :CFBundleDocumentTypes:0 dict" \
+  -c "Add :CFBundleDocumentTypes:0:CFBundleTypeName string 'Markdown File'" \
+  -c "Add :CFBundleDocumentTypes:0:CFBundleTypeRole string Editor" \
+  -c "Add :CFBundleDocumentTypes:0:LSHandlerRank string Alternate" \
+  -c "Add :CFBundleDocumentTypes:0:LSItemContentTypes array" \
+  -c "Add :CFBundleDocumentTypes:0:LSItemContentTypes:0 string net.daringfireball.markdown" \
+  -c "Add :CFBundleDocumentTypes:0:LSItemContentTypes:1 string public.plain-text" \
+  "$PLIST"
 
-on open filelist
-  set resDir to (POSIX path of (path to me)) & "Contents/Resources/"
-  set helper to resDir & "md-open-helper.sh"
-  repeat with f in filelist
-    set fPath to POSIX path of f
-    do shell script (quoted form of helper) & " " & quoted form of fPath & " " & quoted form of resDir
-  end repeat
-end open
-ASCRIPT
-
-TMPAPP_DIR=$(mktemp -d /tmp/md-applet-XXXXXX)
-TMPAPP_PATH="$TMPAPP_DIR/applet.app"
-osacompile -o "$TMPAPP_PATH" "$TMPSCRIPT"
-
-# Extract the droplet binary and compiled script into our bundle.
-# Scripts with 'on open' produce a 'droplet'; those without produce an 'applet'.
-# The runtime locates its script via the bundle's Resources directory,
-# so renaming the binary does not affect script lookup.
-cp "$TMPAPP_PATH/Contents/MacOS/droplet" "$MACOS/md-open"
-chmod +x "$MACOS/md-open"
-cp "$TMPAPP_PATH/Contents/Resources/Scripts/main.scpt" "$SCRIPTS_DIR/main.scpt"
-
-rm -f "$TMPSCRIPT"
-rm -rf "$TMPAPP_DIR"
-
-# Create Info.plist
-cat > "$CONTENTS/Info.plist" << PLIST
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-  <key>CFBundleExecutable</key>
-  <string>md-open</string>
-  <key>CFBundleIdentifier</key>
-  <string>com.opencode.md-editor</string>
-  <key>CFBundleName</key>
-  <string>Markdown Editor</string>
-  <key>CFBundleVersion</key>
-  <string>1.0</string>
-  <key>CFBundlePackageType</key>
-  <string>APPL</string>
-  <key>CFBundleShortVersionString</key>
-  <string>1.0</string>
-  <key>LSMinimumSystemVersion</key>
-  <string>10.15</string>
-  <key>CFBundleDocumentTypes</key>
-  <array>
-    <dict>
-      <key>CFBundleTypeName</key>
-      <string>Markdown File</string>
-      <key>CFBundleTypeRole</key>
-      <string>Editor</string>
-      <key>LSHandlerRank</key>
-      <string>Alternate</string>
-      <key>LSItemContentTypes</key>
-      <array>
-        <string>net.daringfireball.markdown</string>
-        <string>public.plain-text</string>
-      </array>
-    </dict>
-  </array>
-</dict>
-</plist>
-PLIST
+# Re-sign after modifying the bundle (ad-hoc; no Developer ID required)
+codesign --force --deep --sign - "$APP_PATH"
 
 # Register with LaunchServices
 LSREG=/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister
