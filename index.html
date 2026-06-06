@@ -1226,14 +1226,15 @@ function init() {
 
   buildEmojiPicker();
 
-  const hasRestored = restoreAutoSaves();
-  if (!hasRestored) {
+  function loadInitialContent() {
     if (window.__initialContent) {
       try { window.__initialContent = decodeURIComponent(escape(atob(window.__initialContent))); } catch {}
       addTab(window.__initialFileName || 'document.md', window.__initialContent, null);
       delete window.__initialContent; delete window.__initialFileName;
     } else {
-      const defaultContent = `# Welcome to Markdown Editor
+      const hasRestored = restoreAutoSaves();
+      if (!hasRestored) {
+        const defaultContent = `# Welcome to Markdown Editor
 
 This is a **live preview** markdown editor with syntax highlighting and file management.
 
@@ -1286,14 +1287,17 @@ graph TD
 This content appears after a \`---\` separator.
 
 Click **Present** to view as slides.`;
-      addTab('welcome.md', defaultContent, null);
-    }
-  } else {
-    if (tabs.length > 0) {
-      if (!activeTabId) switchTab(tabs[0].id);
-      else switchTab(activeTabId);
+        addTab('welcome.md', defaultContent, null);
+      } else {
+        if (tabs.length > 0) {
+          if (!activeTabId) switchTab(tabs[0].id);
+          else switchTab(activeTabId);
+        }
+      }
     }
   }
+
+  loadInitialContent();
 
   document.getElementById('openBtn').addEventListener('click', pickAndOpen);
   document.getElementById('saveBtn').addEventListener('click', save);

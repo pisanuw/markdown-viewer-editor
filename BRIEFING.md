@@ -43,6 +43,7 @@ A simple split-pane markdown editor with live preview.
 - File management / folder tree
 - Collaborative editing
 - WYSIWYG editing (markdown source only)
+- Routing Finder-opened files into a single browser tab (browser limitation; each double-click opens a new tab by design)
 
 ## macOS Integration
 
@@ -62,13 +63,15 @@ The app registers itself for `.md` files via LaunchServices. Mechanism:
 
 1. Double-clicking a `.md` file sends an Apple Event (`on open`) to `Contents/MacOS/droplet`
 2. `droplet` is the AppleScript runtime binary produced by `osacompile`; it loads `Contents/Resources/Scripts/main.scpt` and runs the `on open` handler, which calls `Contents/Resources/md-open-helper.sh` in the background
-3. The helper base64-encodes the file, injects the content into a temp HTML, and opens it in the default browser
+3. The helper base64-encodes the file, injects the content (raw base64 into `window.__initialContent`) into a temp HTML, and opens it in the default browser; each double-click opens a new browser tab
 4. Temp file is cleaned up after 30 seconds
 
 **Important constraints:**
 - `CFBundleExecutable` must be `droplet` (the name osacompile assigns). Renaming it breaks Apple Event delivery.
 - The full bundle from `osacompile` must be preserved: `PkgInfo`, `droplet.rsrc`, `Assets.car`, and `OSAAppletShowStartupScreen=false` in the plist are all required. Extracting only the binary into a hand-crafted bundle omits these and causes the "Press Run" dialog.
 - `setup-macos-app.sh` compiles directly to the final app path, patches the plist with PlistBuddy, then re-signs with `codesign --force --deep --sign -`.
+- `do shell script` must redirect helper output to `/dev/null` (`> /dev/null 2>&1 &`); without this the droplet blocks on I/O and becomes unresponsive.
+- Do NOT add `tell me to quit` to the `on open` handler — it causes the droplet to hang.
 
 A standalone shell script (`bin/md-open.sh <file>`) is available for terminal use.
 

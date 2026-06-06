@@ -35,8 +35,7 @@ on open filelist
   set helper to resDir & "md-open-helper.sh"
   repeat with f in filelist
     set fPath to POSIX path of f
-    -- Run in background so the handler returns immediately
-    do shell script (quoted form of helper) & " " & quoted form of fPath & " " & quoted form of resDir & " &"
+    do shell script (quoted form of helper) & " " & quoted form of fPath & " " & quoted form of resDir & " > /dev/null 2>&1 &"
   end repeat
 end open
 ASCRIPT
@@ -65,7 +64,7 @@ TMP="$TMPDIR/editor.html"
 
 {
   echo '<script>'
-  echo "window.__initialContent = atob('$B64');"
+  echo "window.__initialContent = '$B64';"
   echo "window.__initialFileName = $NAME_JSON;"
   echo "window.__initialFilePath = $FILE_JSON;"
   echo '</script>'

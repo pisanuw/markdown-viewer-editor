@@ -13,3 +13,9 @@
 2026-06-05 note Initialized git repo and pushed to https://github.com/pisanuw/markdown-viewer-editor.git
 2026-06-05 fix Eliminated "Press Run" dialog: compile droplet directly to app path so osacompile's full bundle is preserved (PkgInfo, droplet.rsrc, Assets.car, OSAAppletShowStartupScreen=false, CFBundleExecutable=droplet); re-sign with codesign ad-hoc after patching plist; on-open handler runs helper in background for immediate return
 2026-06-05 fix Rebuilt Markdown Editor.zip with corrected bundle (23 KB old broken shell-script version replaced with 852 KB proper droplet bundle)
+
+2026-06-06 fix Alternating-empty-tab bug: restoreAutoSaves() was shadowing window.__initialContent; fixed by checking __initialContent before touching localStorage
+2026-06-06 fix Droplet "not responding": do shell script now redirects output to /dev/null so it never blocks; removed tell me to quit which caused hang
+2026-06-06 decision Each Finder double-click opens a new browser tab (by design); cross-tab IPC attempted but abandoned in favour of simplicity and reliability
+2026-06-06 code window.__initialContent now injected as raw base64 (not pre-decoded with atob); index.html decodes correctly, fixing UTF-8 multi-byte characters
+2026-06-06 doc Added README.md with features, keyboard shortcuts, usage, and macOS integration explanation
