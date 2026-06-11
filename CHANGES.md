@@ -19,3 +19,13 @@
 2026-06-06 decision Each Finder double-click opens a new browser tab (by design); cross-tab IPC attempted but abandoned in favour of simplicity and reliability
 2026-06-06 code window.__initialContent now injected as raw base64 (not pre-decoded with atob); index.html decodes correctly, fixing UTF-8 multi-byte characters
 2026-06-06 doc Added README.md with features, keyboard shortcuts, usage, and macOS integration explanation
+
+2026-06-10 fix Empty-file bug: __initialContent = '' is falsy; changed check to !== undefined so empty .md files open correctly instead of falling through to restoreAutoSaves
+
+2026-06-10 fix Root cause of 'second file does not open': a duplicate clone of this repo at ../markdown-editor/ had a stale Markdown Editor.app with the same CFBundleIdentifier; LaunchServices launched the OLD app, so code fixes never ran
+2026-06-10 fix Removed duplicate clone ../markdown-editor/ and unregistered its app + Trash copy from LaunchServices; only /Applications/Markdown Editor.app remains
+2026-06-10 decision Set com.opencode.md-editor as default .md handler (net.daringfireball.markdown) via LSSetDefaultRoleHandlerForContentType, replacing QLMarkdown
+2026-06-10 code Added debug logging to droplet on-open handler and md-open-helper.sh (writes /tmp/md-open-debug.log) to trace which app/helper actually runs
+
+2026-06-10 code Removed debug logging from droplet on-open handler and md-open-helper.sh now that the duplicate-clone root cause is fixed
+2026-06-10 code Rebuilt Markdown Editor.app (debug removed + empty-file fix), reinstalled to /Applications, re-set as default .md handler; rebuilt Markdown Editor.zip (852K full droplet bundle)

@@ -1227,9 +1227,11 @@ function init() {
   buildEmojiPicker();
 
   function loadInitialContent() {
-    if (window.__initialContent) {
-      try { window.__initialContent = decodeURIComponent(escape(atob(window.__initialContent))); } catch {}
-      addTab(window.__initialFileName || 'document.md', window.__initialContent, null);
+    if (window.__initialContent !== undefined) {
+      const decoded = window.__initialContent
+        ? (() => { try { return decodeURIComponent(escape(atob(window.__initialContent))); } catch { return window.__initialContent; } })()
+        : '';
+      addTab(window.__initialFileName || 'document.md', decoded, null);
       delete window.__initialContent; delete window.__initialFileName;
     } else {
       const hasRestored = restoreAutoSaves();
