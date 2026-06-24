@@ -1,0 +1,22 @@
+{
+  "name": "markdown-viewer-editor",
+  "version": "1.0.0",
+  "description": "A single-file, browser-based markdown editor with live preview and macOS Finder integration.",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "author": "Yusuf Pisan",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pisanuw/markdown-viewer-editor.git"
+  },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "dompurify": "3.4.11",
+    "jsdom": "^25.0.0",
+    "marked": "15.0.7",
+    "vitest": "^3.0.0"
+  }
+}

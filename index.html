@@ -3,10 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Content Security Policy (defence in depth; the rendered markdown body is sanitised
+     with DOMPurify). connect-src 'none' blocks data exfiltration; object-src/base-uri
+     'none' block plugin and <base> injection. script-src must keep 'unsafe-inline'
+     because the entire app is one inline <script> served from file://, where per-request
+     nonces cannot be applied to a static file. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data: blob: https:; font-src https://cdn.jsdelivr.net data:; connect-src 'none'; worker-src blob:; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>Markdown Editor</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5/lib/codemirror.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5/addon/dialog/dialog.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.21/lib/codemirror.css" integrity="sha384-bsaAhvdduZPAwUb7RRLRvDgtEtOsggrgjkr/EjPO1i/vdoi+DmdLaG79UOt6M5hD" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.21/addon/dialog/dialog.css" integrity="sha384-md19vSE9P4AgqWc2VTrqi+l5aPSvW1m6Fojz+kEpMvFCgZfSY7TB8vcUp6o6ncKU" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" integrity="sha384-nB0miv6/jRmo5UMMR1wu3Gz6NLsoTkbqJghGIsx//Rlm+ZU03BU6SQNC66uf4l5+" crossorigin="anonymous">
 <style>
 :root {
   --bg: #fff;
@@ -523,17 +529,18 @@ body.focus .tab-bar .tab:not(.active) { display: none; }
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/codemirror@5/lib/codemirror.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/codemirror@5/mode/markdown/markdown.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/codemirror@5/keymap/vim.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/codemirror@5/keymap/emacs.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/codemirror@5/addon/search/search.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/codemirror@5/addon/search/searchcursor.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/codemirror@5/addon/dialog/dialog.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/marked@15.0.7/marked.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.21/lib/codemirror.js" integrity="sha384-YbR2n4zUtdAz2YuqQsJFpjrgTl5SPEm0NG+y8/y3R63tAWTA3O7TOyIWyYYcqUqU" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.21/mode/markdown/markdown.js" integrity="sha384-+DgrmBJvzFFizEu8fQ9BvzcKDPhSyCyRuotcIQIwwtlN+3G+PEqcojPeRE9KhS7u" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.21/keymap/vim.js" integrity="sha384-QNfb2uW2pbePXjiJgvRcNHrolEypmVZMzVipQsmbSpdZOCokLU7LskOoKplRxzRU" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.21/keymap/emacs.js" integrity="sha384-Uhen0w7tjEhY6D10sOvXjvFvSswJQFQPUJ7ngPm3mqUsK1vkKoJr+1PXpkIUE1Vc" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.21/addon/search/search.js" integrity="sha384-YOqVmw4q7LIontAg+aAO3ue2A9YlY53lFxQyY4JnsmE1/Wdv4NEvyMa04z7nffwb" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.21/addon/search/searchcursor.js" integrity="sha384-Fb0JQymUnTS6/ObRqQC2jFewjRP/5GdhVYdNSrgR5LhWLaTDi2OPvCRqoJlRGrDm" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.21/addon/dialog/dialog.js" integrity="sha384-FV8vL89nnU1VWPuHBUuUYCYWH8ozli0A7PAY8C7CJd4oRDnQZ80UNPQjXcRp6mfq" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked@15.0.7/marked.min.js" integrity="sha384-H+hy9ULve6xfxRkWIh/YOtvDdpXgV2fmAGQkIDTxIgZwNoaoBal14Di2YTMR6MzR" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.4.11/dist/purify.min.js" integrity="sha384-o44XUELLEnv/iSlA1NWxBweqbD4TSR0qgq2VzVsxtkHS989JJjGKSE9vkfo5MN4K" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" integrity="sha384-43gviWU0YVjaDtb/GhzOouOXtZMP/7XUzwPTstBeZFe/+rCMvRwr4yROQP43s0Xk" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11.15.0/dist/mermaid.min.js" integrity="sha384-yQ4mmBBT+vhTAwjFH0toJXNYJ6O4usWnt6EPIdWwrRvx2V/n5lXuDZQwQFeSFydF" crossorigin="anonymous"></script>
 <script>
 try { mermaid.initialize({ startOnLoad: false, theme: 'base', themeVariables: {} }); } catch {}
 
@@ -775,9 +782,11 @@ function renderRecentDropdown() {
 function scheduleAutoSave() {
   clearTimeout(autoSaveTimer);
   autoSaveTimer = setTimeout(() => {
+    let autoSaveFailed = false;
     tabs.forEach(t => {
       const content = t.id === activeTabId ? editor.getValue() : t.content;
-      try { localStorage.setItem(LS_AUTOSAVE_PREFIX + t.id, JSON.stringify({ name: t.name, content, time: Date.now() })); } catch {}
+      try { localStorage.setItem(LS_AUTOSAVE_PREFIX + t.id, JSON.stringify({ name: t.name, content, time: Date.now() })); }
+      catch (e) { autoSaveFailed = true; }
     });
     if (tabs.length) {
       try {
@@ -787,10 +796,18 @@ function scheduleAutoSave() {
           fontSize: document.documentElement.style.getPropertyValue('--editor-font-size'),
           keymap: document.getElementById('keymapSelect').value
         }));
-      } catch {}
+      } catch (e) { autoSaveFailed = true; }
     }
-    autoSaveStatus.textContent = 'Saved';
-    setTimeout(() => { autoSaveStatus.textContent = ''; }, 2000);
+    if (autoSaveFailed) {
+      // localStorage quota exceeded or disabled: warn instead of silently dropping the backup
+      autoSaveStatus.style.color = 'var(--danger, #c0392b)';
+      autoSaveStatus.textContent = 'Auto-save failed (storage full)';
+      console.warn('Auto-save to localStorage failed; recent changes are not backed up.');
+    } else {
+      autoSaveStatus.style.color = '';
+      autoSaveStatus.textContent = 'Saved';
+      setTimeout(() => { autoSaveStatus.textContent = ''; }, 2000);
+    }
   }, 2000);
 }
 
@@ -874,10 +891,24 @@ function renderMermaid() {
   try { mermaid.run({ nodes: [...preview.querySelectorAll('.mermaid')] }); } catch {}
 }
 
+// Render markdown to HTML, then strip any active content (scripts, event-handler
+// attributes, javascript: URLs) before it reaches innerHTML. The app opens .md
+// files from untrusted sources on file://, so an unsanitised render would let a
+// malicious document run JS and read local files. marked@15 dropped its built-in
+// sanitiser, so DOMPurify is mandatory. Fail closed: if DOMPurify did not load
+// (e.g. SRI mismatch or offline), show the escaped source rather than raw HTML.
+function renderMarkdown(text) {
+  const html = marked.parse(text, { breaks: true, gfm: true });
+  if (typeof DOMPurify === 'undefined' || typeof DOMPurify.sanitize !== 'function') {
+    return '<pre>' + escapeHtml(text) + '</pre>';
+  }
+  return DOMPurify.sanitize(html);
+}
+
 function update() {
   if (!editor) return;
   const text = editor.getValue();
-  preview.innerHTML = marked.parse(text, { breaks: true, gfm: true });
+  preview.innerHTML = renderMarkdown(text);
   wordCount.textContent = countWords(text) + ' words';
   updateStats(text);
   updateTOC(text);
@@ -1127,7 +1158,7 @@ function showPresentSlide(i) {
   if (i < 0 || i >= presentSlides.length) return;
   presentIndex = i;
   const slide = document.getElementById('presentSlide');
-  slide.innerHTML = marked.parse(presentSlides[i], { breaks: true, gfm: true });
+  slide.innerHTML = renderMarkdown(presentSlides[i]);
   renderMath();
   document.getElementById('presentCounter').textContent = `${i + 1} / ${presentSlides.length}`;
 }

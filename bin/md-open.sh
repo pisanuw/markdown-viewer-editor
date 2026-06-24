@@ -26,10 +26,13 @@ FILE_JSON=$(python3 -c "import sys,json; print(json.dumps(sys.argv[1]))" "$FILE"
 TMPDIR=$(mktemp -d /tmp/md-editor-XXXXXX)
 TMP="$TMPDIR/editor.html"
 
-# Build temp HTML: inject content, then append the editor
+# Build temp HTML: inject content, then append the editor.
+# __initialContent is injected as RAW base64; index.html decodes it with atob().
+# This must match Markdown Editor.app's md-open-helper.sh (see setup-macos-app.sh).
+# Pre-decoding here would make index.html atob() a plain-text string and throw.
 {
   echo '<script>'
-  echo "window.__initialContent = atob('$B64');"
+  echo "window.__initialContent = '$B64';"
   echo "window.__initialFileName = $NAME_JSON;"
   echo "window.__initialFilePath = $FILE_JSON;"
   echo '</script>'

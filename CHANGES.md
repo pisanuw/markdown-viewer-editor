@@ -19,3 +19,13 @@
 2026-06-06 decision Each Finder double-click opens a new browser tab (by design); cross-tab IPC attempted but abandoned in favour of simplicity and reliability
 2026-06-06 code window.__initialContent now injected as raw base64 (not pre-decoded with atob); index.html decodes correctly, fixing UTF-8 multi-byte characters
 2026-06-06 doc Added README.md with features, keyboard shortcuts, usage, and macOS integration explanation
+
+2026-06-24 fix Sanitize rendered markdown with DOMPurify (fail-closed) at both render sites and add a Content-Security-Policy; the app opens untrusted .md files on file:// so unsanitized marked.parse output to innerHTML was an XSS hole
+2026-06-24 fix Pin all CDN dependencies to exact versions and add Subresource Integrity + crossorigin to every script/link tag
+2026-06-24 fix bin/md-open.sh injected pre-decoded base64 (atob) while index.html expects raw base64; aligned it with md-open-helper.sh so the terminal entry point stops throwing
+2026-06-24 fix Surface localStorage autosave failures in the status bar instead of swallowing them silently
+2026-06-24 fix Renamed leftover com.opencode.md-editor bundle identifier to com.pisanuw.md-editor
+2026-06-24 doc README: removed broken screenshot reference, corrected the false "no dependencies" claim, updated macOS build and distribution sections
+2026-06-24 code Added MIT LICENSE
+2026-06-24 code Added package.json + vitest/jsdom test suite (XSS sanitization, SRI wiring, base64 entry-point contract) and GitHub Actions CI (test, shellcheck, README link check)
+2026-06-24 scope Stopped tracking Markdown Editor.zip (~852KB app bundle); ignore *.zip and distribute via GitHub Releases; purged the blob from all git history (force-push required to update origin)

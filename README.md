@@ -2,8 +2,6 @@
 
 A single-file, browser-based markdown editor with live preview and macOS Finder integration.
 
-![Split-pane editor with markdown source on the left and rendered preview on the right](https://github.com/pisanuw/markdown-viewer-editor/raw/main/screenshot.png)
-
 ## Features
 
 - **Live preview** — rendered HTML updates as you type
@@ -24,7 +22,7 @@ A single-file, browser-based markdown editor with live preview and macOS Finder 
 - **Vim / Emacs** key bindings (optional)
 - **Print stylesheet** — prints the preview only
 - **Resizable split pane**
-- No build step, no dependencies to install — one HTML file
+- No build step and nothing to install locally: the app is one HTML file. Its libraries (CodeMirror, marked, KaTeX, Mermaid, and DOMPurify for sanitizing rendered HTML) load from the jsDelivr CDN over HTTPS with pinned versions and Subresource Integrity, so an internet connection is required on first load.
 
 ## Keyboard shortcuts
 
@@ -46,21 +44,19 @@ Open `index.html` directly in any modern browser. No server required.
 
 ### macOS — double-click `.md` files in Finder
 
-A pre-built `Markdown Editor.app` is included. To set it as the default handler for `.md` files:
+First build `Markdown Editor.app` (one-time):
+
+```bash
+./bin/setup-macos-app.sh
+```
+
+This creates `Markdown Editor.app` in the repo root. The app is self-contained and can be moved to `/Applications`. To set it as the default handler for `.md` files:
 
 1. Right-click any `.md` file in Finder and choose **Open With > Other...**
 2. Select `Markdown Editor.app`
 3. To make it the default: **Get Info > Open With > Markdown Editor > Change All...**
 
 Double-clicking subsequent `.md` files opens them as tabs in the same editor window.
-
-#### Building the app yourself
-
-```bash
-./bin/setup-macos-app.sh
-```
-
-This creates `Markdown Editor.app` in the repo root. The app is self-contained and can be moved to `/Applications`.
 
 #### Terminal
 
@@ -73,6 +69,8 @@ This creates `Markdown Editor.app` in the repo root. The app is self-contained a
 ```bash
 ./bin/make-zip.sh   # produces Markdown Editor.zip
 ```
+
+The zip is a build artifact (not committed to the repo); attach it to a [GitHub Release](https://github.com/pisanuw/markdown-viewer-editor/releases) for distribution.
 
 ## How the macOS integration works
 

@@ -81,8 +81,8 @@ chmod +x "$RESOURCES/md-open-helper.sh"
 # CFBundleExecutable stays as 'droplet' (osacompile's value) — renaming it
 # breaks Apple Event delivery.
 /usr/libexec/PlistBuddy -c "Set :CFBundleName 'Markdown Editor'" "$PLIST"
-/usr/libexec/PlistBuddy -c "Add :CFBundleIdentifier string com.opencode.md-editor" "$PLIST" \
-  2>/dev/null || /usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier com.opencode.md-editor" "$PLIST"
+/usr/libexec/PlistBuddy -c "Add :CFBundleIdentifier string com.pisanuw.md-editor" "$PLIST" \
+  2>/dev/null || /usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier com.pisanuw.md-editor" "$PLIST"
 /usr/libexec/PlistBuddy -c "Delete :CFBundleDocumentTypes" "$PLIST"
 /usr/libexec/PlistBuddy \
   -c "Add :CFBundleDocumentTypes array" \

@@ -1,2 +1,8 @@
 .DS_Store
 Markdown Editor.app/
+
+# Build artifacts (distributable zip is attached to Releases, not committed)
+*.zip
+
+# Node tooling (tests only; the app itself ships as a single HTML file)
+node_modules/
