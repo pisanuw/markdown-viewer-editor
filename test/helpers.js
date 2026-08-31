@@ -28,3 +28,30 @@ export function buildRenderMarkdown({ marked, DOMPurify, escapeHtml }) {
     escapeHtml,
   );
 }
+
+// index.html also defines several small utilities as single-line functions
+// (e.g. `function escapeHtml(str) { ... }`), so the closing brace is never at
+// the start of its own line and extractFunction()'s `\n}` anchor can't find
+// it. Grab the whole physical line instead: these one-liners are self
+// contained (balanced braces, no embedded newline), so the line *is* the
+// function.
+export function extractLineFunction(name) {
+  const re = new RegExp(`^function ${name}\\([^)]*\\) \\{.*\\}$`, 'm');
+  const m = indexHtml.match(re);
+  if (!m) throw new Error(`Could not find single-line function ${name}() in index.html`);
+  return m[0];
+}
+
+// Build a pure (or near-pure) top-level function from index.html with its free
+// variables bound, and return it ready to call. `extractor` must be either
+// extractFunction (multi-line, closing brace on its own line) or
+// extractLineFunction (single-line) -- callers pick explicitly rather than
+// letting this guess, because extractFunction's non-greedy `\n}` search will
+// happily (and silently) over-match past a one-line function into whatever
+// multi-line function happens to follow it in the file.
+export function build(name, extractor, freeVars = {}) {
+  const src = extractor(name);
+  const argNames = Object.keys(freeVars);
+  const argValues = Object.values(freeVars);
+  return new Function(...argNames, `${src}\nreturn ${name};`)(...argValues);
+}

@@ -29,3 +29,6 @@
 2026-06-24 code Added MIT LICENSE
 2026-06-24 code Added package.json + vitest/jsdom test suite (XSS sanitization, SRI wiring, base64 entry-point contract) and GitHub Actions CI (test, shellcheck, README link check)
 2026-06-24 scope Stopped tracking Markdown Editor.zip (~852KB app bundle); ignore *.zip and distribute via GitHub Releases; purged the blob from all git history (force-push required to update origin)
+
+2026-08-31 test Added test/text-utils.test.js (countWords, headingToId, escapeHtml, escapeAttr, debounce), test/toc.test.js (updateTOC heading parsing and its own XSS surface via data-heading/innerHTML), test/sanitize-more.test.js (more renderMarkdown XSS vectors plus checks that task lists, GFM breaks, KaTeX/Mermaid delimiters, links, and tables survive sanitization); extended test/helpers.js with extractLineFunction()/build() to extract index.html's single-line functions
+2026-08-31 doc README: added CI status badge

@@ -1,5 +1,7 @@
 # Markdown Editor
 
+[![CI](https://github.com/pisanuw/markdown-viewer-editor/actions/workflows/ci.yml/badge.svg)](https://github.com/pisanuw/markdown-viewer-editor/actions/workflows/ci.yml)
+
 A single-file, browser-based markdown editor with live preview and macOS Finder integration.
 
 ## Features
