@@ -45,6 +45,11 @@ rm -f "$TMPSCRIPT"
 
 # Add our resources to the osacompile-generated bundle
 cp "$DIR/index.html" "$RESOURCES/"
+if [ ! -d "$DIR/vendor" ]; then
+  echo "ERROR: vendor/ not found. Run ./bin/vendor.sh first." >&2
+  exit 1
+fi
+cp -R "$DIR/vendor" "$RESOURCES/"
 
 cat > "$RESOURCES/md-open-helper.sh" << 'HELPER'
 #!/bin/bash
@@ -58,17 +63,27 @@ NAME=$(basename "$FILE")
 B64=$(base64 < "$FILE" | tr -d '\n')
 NAME_JSON=$(python3 -c "import sys,json; print(json.dumps(sys.argv[1]))" "$NAME")
 FILE_JSON=$(python3 -c "import sys,json; print(json.dumps(sys.argv[1]))" "$FILE")
+# file:// URL of Contents/Resources/, percent-encoded ("Markdown Editor.app"
+# contains a space). quote() emits only URL-safe characters, so the value is
+# also safe to splice into the sed replacement below.
+RES_URL=$(python3 -c "import sys,urllib.parse; print('file://' + urllib.parse.quote(sys.argv[1]))" "$RES_DIR")
 
 TMPDIR=$(mktemp -d /tmp/md-editor-XXXXXX)
 TMP="$TMPDIR/editor.html"
 
+# A <base> tag is spliced into <head> so the temp copy resolves its relative
+# vendor/ asset paths against the app's Resources directory instead of $TMPDIR.
+# The 1,/<head>/ range restricts sed to the FIRST <head> (line 3): the string
+# also appears inside JS template literals (exportHtml/copyHtml), and a global
+# replace would inject the base tag into every exported HTML document. The
+# range form works in both BSD (macOS) and GNU sed.
 {
   echo '<script>'
   echo "window.__initialContent = '$B64';"
   echo "window.__initialFileName = $NAME_JSON;"
   echo "window.__initialFilePath = $FILE_JSON;"
   echo '</script>'
-  cat "${RES_DIR}index.html"
+  sed "1,/<head>/s|<head>|<head><base href=\"$RES_URL\">|" "${RES_DIR}index.html"
 } > "$TMP"
 
 open "file://$TMP"

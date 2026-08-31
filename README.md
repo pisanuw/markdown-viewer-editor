@@ -24,7 +24,7 @@ A single-file, browser-based markdown editor with live preview and macOS Finder 
 - **Vim / Emacs** key bindings (optional)
 - **Print stylesheet** — prints the preview only
 - **Resizable split pane**
-- No build step and nothing to install locally: the app is one HTML file. Its libraries (CodeMirror, marked, KaTeX, Mermaid, and DOMPurify for sanitizing rendered HTML) load from the jsDelivr CDN over HTTPS with pinned versions and Subresource Integrity, so an internet connection is required on first load.
+- **Fully offline**: no build step, nothing to install, no network needed. The app is one HTML file plus a vendored `vendor/` directory containing its libraries (CodeMirror, marked, KaTeX, Mermaid, and DOMPurify for sanitizing rendered HTML) at pinned versions. `bin/vendor.sh` re-downloads them, verifying each file against recorded SHA-384 hashes (the same integrity guarantee SRI used to provide at load time, moved to vendor time and re-checked by the test suite).
 
 ## Keyboard shortcuts
 
@@ -42,7 +42,7 @@ A single-file, browser-based markdown editor with live preview and macOS Finder 
 
 ### In the browser
 
-Open `index.html` directly in any modern browser. No server required.
+Open `index.html` directly in any modern browser. No server, no internet connection required (keep the `vendor/` directory next to it).
 
 ### macOS — double-click `.md` files in Finder
 
@@ -52,7 +52,7 @@ First build `Markdown Editor.app` (one-time):
 ./bin/setup-macos-app.sh
 ```
 
-This creates `Markdown Editor.app` in the repo root. The app is self-contained and can be moved to `/Applications`. To set it as the default handler for `.md` files:
+This creates `Markdown Editor.app` in the repo root, bundling `index.html` and `vendor/` into its Resources. The app is self-contained (works fully offline) and can be moved to `/Applications`. To set it as the default handler for `.md` files:
 
 1. Right-click any `.md` file in Finder and choose **Open With > Other...**
 2. Select `Markdown Editor.app`
