@@ -1122,9 +1122,12 @@ function toggleFocusMode() {
   document.getElementById('focusModeBtn').classList.toggle('btn-active', focusMode);
 }
 
-function togglePreviewOnly() {
-  document.body.classList.toggle('preview-only');
-  document.getElementById('previewOnlyBtn').classList.toggle('btn-active');
+function togglePreviewOnly(force) {
+  const on = document.body.classList.toggle('preview-only', force);
+  document.getElementById('previewOnlyBtn').classList.toggle('btn-active', on);
+  // CodeMirror mis-measures while display:none (e.g. when a Finder-opened file
+  // starts in preview-only mode), so re-measure once the editor is shown again.
+  if (!on && editor) editor.refresh();
 }
 
 function toggleTOC() { tocPanel.classList.toggle('open'); }
@@ -1269,6 +1272,8 @@ function init() {
       try { window.__initialContent = decodeURIComponent(escape(atob(window.__initialContent))); } catch {}
       addTab(window.__initialFileName || 'document.md', window.__initialContent, null);
       delete window.__initialContent; delete window.__initialFileName;
+      // Files opened from Finder (or md-open.sh) are usually opened to be read
+      togglePreviewOnly(true);
     } else {
       const hasRestored = restoreAutoSaves();
       if (!hasRestored) {
@@ -1342,7 +1347,7 @@ Click **Present** to view as slides.`;
   document.getElementById('saveAsBtn').addEventListener('click', saveAs);
   document.getElementById('wordWrap').addEventListener('change', (e) => editor.setOption('lineWrapping', e.target.checked));
   document.getElementById('focusModeBtn').addEventListener('click', toggleFocusMode);
-  document.getElementById('previewOnlyBtn').addEventListener('click', togglePreviewOnly);
+  document.getElementById('previewOnlyBtn').addEventListener('click', () => togglePreviewOnly());
   document.getElementById('themeBtn').addEventListener('click', toggleTheme);
   document.getElementById('tocToggle').addEventListener('click', toggleTOC);
   document.getElementById('exportHtmlBtn') && document.getElementById('exportHtmlBtn').addEventListener('click', exportHtml);

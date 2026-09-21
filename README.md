@@ -19,6 +19,7 @@ A single-file, browser-based markdown editor with live preview and macOS Finder 
 - **Paste images** from clipboard
 - **Export** rendered preview to a standalone HTML file
 - **Focus mode** — hides the toolbar and preview for distraction-free writing
+- **Preview mode** — hides the editor to show only the rendered document; files opened from Finder start here (click **Preview** to edit)
 - **Present mode** — slide deck from `---`-separated sections
 - **Find and replace** (Ctrl+F)
 - **Vim / Emacs** key bindings (optional)
@@ -58,7 +59,7 @@ This creates `Markdown Editor.app` in the repo root, bundling `index.html` and `
 2. Select `Markdown Editor.app`
 3. To make it the default: **Get Info > Open With > Markdown Editor > Change All...**
 
-Double-clicking subsequent `.md` files opens them as tabs in the same editor window.
+Each double-clicked `.md` file opens in its own browser tab, starting in preview mode.
 
 #### Terminal
 
@@ -81,7 +82,7 @@ The zip is a build artifact (not committed to the repo); attach it to a [GitHub 
 1. macOS sends an `on open` Apple Event to the droplet
 2. The droplet calls `md-open-helper.sh` in the background
 3. The helper base64-encodes the file, injects it into a temp HTML page, and opens it in the default browser
-4. If an editor tab is already open it receives the file as a new tab via `localStorage` IPC; otherwise the temp page initialises as a full editor
+4. The temp page initialises as a full editor with the file loaded, in preview mode. Each double-click opens a new browser tab; files are not routed into an already-open editor
 5. The temp file is cleaned up after 30 seconds
 
 ## Repository
