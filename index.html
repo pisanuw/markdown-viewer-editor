@@ -274,10 +274,42 @@ body.focus .tab-bar .tab:not(.active) { display: none; }
 
 @media print {
   .toolbar-row, .format-bar, .tab-bar, .toc-panel, .splitter, .editor-pane, .status-bar { display: none !important; }
-  .main-container { display: block !important; }
-  .preview-pane { flex: none !important; display: block !important; }
+  /* The screen layout is a viewport-height flex column whose preview is a
+     scroll container (html/body height:100%, .main-container overflow:hidden,
+     .preview-content overflow-y:auto). A height-constrained scroll container
+     clips rather than paginates, so without these resets the browser prints
+     only the first screenful -- one page -- of any document. Everything in
+     the chain back to <html> has to be unconstrained and overflow:visible. */
+  html, body {
+    height: auto !important; overflow: visible !important;
+    display: block !important;
+  }
+  .main-container {
+    display: block !important; flex: none !important;
+    height: auto !important; overflow: visible !important;
+  }
+  .preview-pane {
+    display: block !important; flex: none !important;
+    height: auto !important; overflow: visible !important;
+  }
   .preview-pane .preview-header { display: none; }
-  .preview-pane .preview-content { padding: 0; }
+  .preview-pane .preview-content {
+    display: block !important; flex: none !important;
+    height: auto !important; max-height: none !important;
+    overflow: visible !important;
+  }
+  /* Printed from preview-only mode the screen padding (2em 20%) would throw
+     away two fifths of every page; the generic rule above loses to its higher
+     specificity, so override the margins here instead of in the page box. */
+  body.preview-only .preview-pane .preview-content,
+  .preview-pane .preview-content { padding: 0 !important; }
+  /* Keep self-contained blocks whole rather than split across a page break.
+     This is a preference, not a constraint: anything taller than one page
+     still breaks (the alternative would be losing the overflow), so a long
+     code block paginates as before. */
+  .preview-content pre,
+  .preview-content table,
+  .preview-content img { break-inside: avoid; page-break-inside: avoid; }
 }
 
 .status-bar {

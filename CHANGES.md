@@ -41,3 +41,8 @@
 2026-09-21 code Files opened from Finder (Markdown Editor.app) or bin/md-open.sh now start in preview-only mode; togglePreviewOnly() takes an optional force arg and refreshes CodeMirror when the editor is shown again (it mis-measures while hidden); Preview button listener wrapped so its click Event is not taken as force
 2026-09-21 test Added test/preview-mode.test.js (togglePreviewOnly toggle/force/refresh behavior; guards on the __initialContent branch and the button listener)
 2026-09-21 doc README: corrected two stale claims that Finder-opened files join an existing editor window (cross-tab IPC was abandoned 2026-06-06); each double-click opens a new browser tab
+
+2026-10-11 fix Chrome printed only 1 page (9 of 60 sections): a height-constrained scroll container clips instead of paginating; @media print now resets height/overflow/flex html -> .preview-content
+2026-10-11 fix Printing from preview-only mode kept the 2em 20% screen padding (that selector outranked the print rule), wasting 40% of each page; the print override now names body.preview-only too
+2026-10-11 test Added test/print.test.js: static guards that @media print frees every link html -> .preview-content and drops the preview-only padding, plus a check the screen constraints still exist
+2026-10-11 fix Print: pre/table/img get break-inside+page-break-inside avoid (5 of 12 blocks straddled a page break before, 0 after); no max-height clamp, Chrome slices tall images losslessly
